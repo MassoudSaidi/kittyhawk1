@@ -1,7 +1,13 @@
-import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
+
 import { createClient } from "@/utils/supabase/server";
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
+
+import App from "../App";
+import { QuickstartProvider } from "../../Context";
+
+
+import { Suspense } from "react";
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
@@ -24,15 +30,15 @@ export default async function ProtectedPage() {
         </div>
       </div>
       <div className="flex flex-col gap-2 items-start">
-        <h2 className="font-bold text-2xl mb-4">Your user details</h2>
-        <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto">
-          {JSON.stringify(user, null, 2)}
-        </pre>
+        <h2 className="font-bold text-2xl mb-4">User profile and details</h2>
+          
+        <Suspense fallback={<div>Loading client component...</div>}>
+          <QuickstartProvider>
+            <App />
+          </QuickstartProvider>        
+        </Suspense>
       </div>
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Next steps</h2>
-        <FetchDataSteps />
-      </div>
+
     </div>
   );
 }
