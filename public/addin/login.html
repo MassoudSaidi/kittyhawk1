@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integrated Advisors Login</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
+  <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-js/1.4.0/css/fabric.min.css" />
+  <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-js/1.4.0/css/fabric.components.min.css" />
+  <script src="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-js/1.4.0/js/fabric.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #0078d4;
+      --primary-dark: #106ebe;
+      --secondary-color: #2b88d8;
+      --error-color: #a4262c;
+      --text-primary: #323130;
+      --text-secondary: #605e5c;
+      --background-light: #f3f2f1;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      background-color: var(--background-light);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      -ms-align-items: center;
+      align-items: center;
+      -ms-justify-content: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0px;
+      color: var(--text-primary);
+    }
+
+    .login-container {
+      width: 100%;      
+      max-width: 420px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .login-card {
+      background: white;
+      padding: 32px;
+      border-radius: 4px;
+      box-shadow: var(--card-shadow);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .login-header {
+      -ms-text-align: center;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .company-name {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .login-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .form-field {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .ms-TextField {
+      margin-bottom: 0;
+    }
+
+    .ms-Label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .ms-TextField-wrapper {
+      position: relative;
+    }
+
+    .ms-TextField-field {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 14px;
+      line-height: 20px;
+      border: 1px solid #8a8886;
+      border-radius: 2px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .ms-TextField-field:hover {
+      border-color: #323130;
+    }
+
+    .ms-TextField-field:focus {
+      border-color: var(--primary-color);
+      border-width: 2px;
+      padding: 7px 11px;
+    }
+
+    .field-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 12px;
+      margin-top: 4px;
+      min-height: 20px;
+    }
+
+    .additional-options {
+      display: flex;
+      -ms-justify-content: space-between;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 12px;
+    }
+
+    .ms-CheckBox-field {
+      display: flex;
+      align-items: center;
+    }
+
+    .ms-CheckBox-field label {
+      margin-left: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .forgot-password {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    .button-group {
+      display: flex;
+      -ms-flex-pack: end;
+      -webkit-justify-content: flex-end;
+      justify-content: flex-end;
+    }
+
+    .button-group .ms-Button:not(:first-child) {
+      margin-left: 12px;
+    }
+
+    .ms-Button {
+      min-width: 100px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 2px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .ms-Button--default {
+      background-color: transparent;
+      border: 1px solid #8a8886;
+      color: var(--text-primary);
+    }
+
+    .ms-Button--default:hover {
+      background-color: #f3f2f1;
+    }
+
+    .ms-Button--primary {
+      background-color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      color: white;
+    }
+
+    .ms-Button--primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .ms-Button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .ms-Spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 24px;
+      }
+      
+      .button-group {
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+      
+      .button-group .ms-Button:not(:last-child) {
+        margin-bottom: 8px;
+      }
+      
+      .ms-Button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="ms-Fabric">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="company-name">Integrated Advisors</div>
+        <div class="login-subtitle">Sign in to access your account</div>
+      </div>
+
+      <div class="form-field ms-TextField">
+        <label class="ms-Label" for="email">Email</label>
+        <div class="ms-TextField-wrapper">
+          <input type="email" id="email" class="ms-TextField-field" placeholder="Enter your email address" required />
+          <i class="ms-Icon ms-Icon--Mail field-icon" aria-hidden="true"></i>
+        </div>
+        <div class="error-message" id="email-error"></div>
+      </div>
+
+      <div class="form-field ms-TextField">
+        <label class="ms-Label" for="password">Password</label>
+        <div class="ms-TextField-wrapper">
+          <input type="password" id="password" class="ms-TextField-field" placeholder="Enter your password" required />
+          <i class="ms-Icon ms-Icon--Lock field-icon" aria-hidden="true"></i>
+        </div>
+        <div class="error-message" id="password-error"></div>
+      </div>
+
+      <div class="error-message" id="error"></div>
+
+      <div class="button-group">
+        <button id="cancelButton" class="ms-Button ms-Button--default">
+          <span class="ms-Button-label">Cancel</span>
+        </button>
+        <button id="loginButton" class="ms-Button ms-Button--primary">
+          <span class="ms-Button-label">Sign in</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Fabric components
+    var checkboxElements = document.querySelectorAll(".ms-CheckBox");
+    for (var i = 0; i < checkboxElements.length; i++) {
+      new fabric['CheckBox'](checkboxElements[i]);
+    }
+
+    let isLoading = false;
+
+    function validateEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      
+      // Reset error messages
+      document.getElementById('email-error').textContent = '';
+      document.getElementById('password-error').textContent = '';
+      document.getElementById('error').style.display = 'none';
+      
+      if (!email) {
+        document.getElementById('email-error').textContent = 'Email is required';
+        isValid = false;
+      } else if (!validateEmail(email)) {
+        document.getElementById('email-error').textContent = 'Please enter a valid email address';
+        isValid = false;
+      }
+      
+      if (!password) {
+        document.getElementById('password-error').textContent = 'Password is required';
+        isValid = false;
+      }
+      
+      return isValid;
+    }
+
+    function setLoading(loading) {
+      isLoading = loading;
+      const loginButton = document.getElementById('loginButton');
+      const cancelButton = document.getElementById('cancelButton');
+      const buttonLabel = loginButton.querySelector('.ms-Button-label');
+      
+      loginButton.disabled = loading;
+      cancelButton.disabled = loading;
+      
+      if (loading) {
+        buttonLabel.innerHTML = '<span class="ms-Spinner"></span> Signing in...';
+      } else {
+        buttonLabel.textContent = 'Sign in';
+      }
+    }
+
+    function showError(message) {
+      const errorElement = document.getElementById('error');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+
+    document.getElementById('loginButton').onclick = function () {
+      if (!validateForm()) {
+        return;
+      }
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      //const rememberMe = document.getElementById('remember-me').checked;
+
+      setLoading(true);
+      try {
+        Office.context.ui.messageParent(JSON.stringify({
+          type: 'login',
+          email,
+          password
+        }));
+      } catch (error) {
+        showError(error.message || 'An unexpected error occurred');
+        setLoading(false);
+      }
+    };
+
+    document.getElementById('cancelButton').onclick = function () {
+      Office.context.ui.messageParent(JSON.stringify({
+        type: 'cancel'
+      }));
+    };
+
+    // Add enter key support
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && !isLoading) {
+        document.getElementById('loginButton').click();
+      }
+    });
+
+    // Focus the email field on load
+    window.onload = function() {
+      document.getElementById('email').focus();
+    };
+  </script>
+</body>
+</html>

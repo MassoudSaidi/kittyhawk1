@@ -18,20 +18,16 @@ export async function GET() {
       );
     }
 
-    // Optional: Check if user has admin role or specific permissions
-    // You can add this if you want to restrict this endpoint to certain users
-    // const { data: userRole } = await supabase
-    //   .from('user_roles')
-    //   .select('role')
-    //   .eq('user_id', user.id)
-    //   .single();
-    
-    // if (userRole?.role !== 'admin') {
-    //   return NextResponse.json(
-    //     { error: "Insufficient permissions" },
-    //     { status: 403 }
-    //   );
-    // }
+    // Check user's role in the user_roles table
+    const { data: roleEntry, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('email', user.email)
+      .maybeSingle();
+
+    if (roleError || !roleEntry || roleEntry.role !== 'admin') {
+      return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
+    }
 
     const { data, error } = await supabase
       .from('accounts')
@@ -43,7 +39,7 @@ export async function GET() {
       ) : [];
       
     if (error) {
-      console.error("Error fetching distinct emails:", error.message);
+      //console.error("Error fetching distinct emails:", error.message);
       return NextResponse.json(
         { error: "Failed to fetch distinct emails" },
         { status: 500 }

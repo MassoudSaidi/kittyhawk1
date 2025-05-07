@@ -16,22 +16,42 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
+    // Step 1: Sign in
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
+    if (error || !data.user) {
       return NextResponse.json(
-        { error: error.message },
+        { error: error?.message || "Invalid credentials" },
         { status: 401 }
       );
     }
 
+    // Step 2: Check admin role
+    const { data: roleEntry, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (roleError || !roleEntry || roleEntry.role !== 'admin') {
+      // Immediately sign the user out to invalidate the session
+      await supabase.auth.signOut();
+
+      return NextResponse.json(
+        { error: "Access denied: Admins only" },
+        { status: 403 }
+      );
+    }
+
+    // Step 3: Allow access
     return NextResponse.json({
       user: data.user,
-      session: data.session,
+      //session: data.session,
     });
+
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

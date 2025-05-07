@@ -1,45 +1,155 @@
-// app/api/transactions/route.ts
-import { NextResponse } from "next/server";
-import { plaidClient, ACCESS_TOKEN } from "../../lib/plaidClient";
-import { Transaction, RemovedTransaction, TransactionsSyncResponse } from "plaid"; // Import Plaid types
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { plaidClient } from '../../lib/plaidClient';
+import { PlaidApi } from 'plaid';
 
-export async function GET() {
+// Define types for TypeScript
+interface Account {
+  institution_name: string;
+  access_token: string;
+}
+
+interface ReducedTransaction {
+  date: string;
+  name: string;
+  amount: number;
+  primaryCategory: string;
+  detailedCategory: string;
+}
+
+interface CategorySummary {
+  primaryCategory: string;
+  amount: number;
+}
+
+interface RequestBody {
+  userId: string;
+  userEmail: string;
+  start_date: string;
+  end_date: string;
+}
+
+// Function to fetch and aggregate transactions for all accounts
+async function getAllTransactions(
+  start_date: string,
+  end_date: string,
+  accounts: Account[],
+  plaidClient: PlaidApi
+): Promise<{ categorySummaries: CategorySummary[], rawTransactions: ReducedTransaction[], allNormalizedReducedTransactions: { primaryCategory: string, monthlyAmount: number }[] }> {
+  // Map each account to a promise
+  const allTransactionPromises = accounts.map(async (account) => {
+    const transactionsResponse = await plaidClient.transactionsGet({
+      access_token: account.access_token,
+      start_date: start_date,
+      end_date: end_date
+    });
+
+    // Reduce transactions for this account
+    return transactionsResponse.data.transactions.map(transaction => ({
+      bank: account.institution_name,
+      date: transaction.date,
+      name: transaction.name,
+      amount: transaction.amount,
+      primaryCategory: transaction.personal_finance_category?.primary ?? 'UNCATEGORIZED',
+      detailedCategory: transaction.personal_finance_category?.detailed ?? 'UNCATEGORIZED'
+    }));
+  });
+
+  // Wait for all promises to resolve and flatten the arrays into one
+  const allReducedTransactions = (await Promise.all(allTransactionPromises)).flat();
+  //return allReducedTransactions;
+
+  // Aggregate amounts by primaryCategory
+  const categoryMap: { [key: string]: number } = {};
+
+  allReducedTransactions.forEach(transaction => {
+    const category = transaction.detailedCategory;
+    const amount = transaction.amount;
+
+    if (!categoryMap[category]) {
+      categoryMap[category] = 0;
+    }
+    categoryMap[category] += amount;
+  });
+
+  // Normalize to monthly values (30-day)
+  const delta = Math.ceil((new Date(end_date).getTime() - new Date(start_date).getTime()) / (1000 * 60 * 60 * 24));
+  const allNormalizedReducedTransactions = Object.entries(categoryMap).map(
+    ([category, total]) => ({
+      primaryCategory: category,
+      monthlyAmount: +(total * 30 / delta).toFixed(2) // Normalize from delta days → 30 days
+    })
+  );  
+
+  // Convert the map to an array of CategorySummary objects
+  const categorySummaries: CategorySummary[] = Object.entries(categoryMap).map(([primaryCategory, amount]) => ({
+    primaryCategory,
+    amount
+  }));
+
+  return { 
+    allNormalizedReducedTransactions,
+    categorySummaries,
+    rawTransactions: allReducedTransactions    
+    };
+}
+
+// Define the API route
+export async function POST(req: NextRequest) {
   try {
-    if (!ACCESS_TOKEN) {
-      return NextResponse.json({ error: "Access token not found" }, { status: 401 });
+    const supabase = await createClient();
+    
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+    }    
+
+    // Check user's role in the user_roles table
+    const { data: roleEntry, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('email', user.email)
+      .maybeSingle();
+
+    if (roleError || !roleEntry || roleEntry.role !== 'admin') {
+      return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
+    }    
+
+    // Get data from request body
+    const body: RequestBody = await req.json();
+    const { userId, userEmail,start_date, end_date } = body;
+
+    // Get all access_tokens from the account table for the user email
+    const { data: accounts, error: dbError } = await supabase
+      .from('accounts')
+      .select('access_token, institution_name')
+      .eq('email', userEmail);
+
+    if (dbError) {
+      return NextResponse.json(
+        { error: "Failed to fetch access tokens" },
+        { status: 500 }
+      );
     }
 
-    let cursor: string = '';
-    let added: Transaction[] = []; // Explicitly type as Transaction[]
-    let modified: Transaction[] = []; // Explicitly type as Transaction[]
-    let removed: RemovedTransaction[] = []; // Explicitly type as RemovedTransaction[]
-    let hasMore: boolean = true;
+    // Fetch and aggregate transactions for all accounts
+    const reducedTransactions = await getAllTransactions(start_date, end_date, accounts, plaidClient);
 
-    while (hasMore) {
-      const request = {
-        access_token: ACCESS_TOKEN,
-        cursor: cursor,
-      };
-      const response = await plaidClient.transactionsSync(request);
-      const data = response.data;
-
-      cursor = data.next_cursor;
-      if (cursor === "") {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        continue;
-      }
-
-      added = added.concat(data.added);
-      modified = modified.concat(data.modified);
-      removed = removed.concat(data.removed);
-      hasMore = data.has_more;
-    }
-
-    const compareTxnsByDateAscending = (a: Transaction, b: Transaction): number => Number(a.date > b.date) - Number(a.date < b.date);
-    const recently_added = [...added].sort(compareTxnsByDateAscending).slice(-8);
-    return NextResponse.json({ latest_transactions: recently_added });
+    return NextResponse.json(
+      { 
+        success: "success",
+        userId: userId,
+        userEmail: userEmail,
+        accounts: accounts,
+        transactions: reducedTransactions,        
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error fetching transactions:", error);
-    return NextResponse.json({ error: "Failed to fetch transactions" }, { status: 500 });
+    return NextResponse.json(
+      { error: "An error occurred while fetching item data." },
+      { status: 500 }
+    );
   }
 }

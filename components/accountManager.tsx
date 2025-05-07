@@ -108,7 +108,13 @@ export default function AccountManager() {
 
   const handleDisconnect = async (accountId: number) => {
     if (!userId) { /* ... guard ... */ return; }
-    if (!confirm(/* ... confirm ... */)) { return; }
+
+    const account = accounts.find(a => a.id === accountId);
+    const institutionName = account?.institution_name || 'this account';
+  
+    const confirmed = confirm(`Are you sure you want to disconnect the "${institutionName}" account?`);
+    if (!confirmed) return;    
+    //if (!confirm("Are you sure you want to delete this account?")) { return; }
 
     setLoadingAccounts(true); // Use account loading state for feedback
 
