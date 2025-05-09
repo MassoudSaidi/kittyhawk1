@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server"; // Adjust the path
+import { createClient } from "@/utils/supabase/server"; 
 import { plaidClient } from "../../lib/plaidClient";
+import { encrypt } from '@/lib/encryption';
 
 export async function POST(request: Request) {
   try {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     const accessToken = tokenResponse.data.access_token;
     const itemId = tokenResponse.data.item_id;
 
-    console.log("Token Exchange Data:", JSON.stringify(tokenResponse.data, null, 2));
+    //console.log("Token Exchange Data:", JSON.stringify(tokenResponse.data, null, 2));
 
     // // Fetch institution details
     const itemResponse = await plaidClient.itemGet({
@@ -50,6 +51,9 @@ export async function POST(request: Request) {
     });
 
     const institutionName = itemResponse.data.item?.institution_name || "Unknown Institution";
+
+    // ecrypted access token
+    const { encryptedToken, iv, tag } = encrypt(accessToken);
 
     // Insert into Supabase accounts table
     const { error: insertError } = await supabase
@@ -59,7 +63,10 @@ export async function POST(request: Request) {
           email: userEmail, // Store user email
           user_id: user.id, // Store authenticated user ID
           item_id: itemId,
-          access_token: accessToken,
+          //access_token: accessToken,
+          access_token: encryptedToken,
+          iv: iv,
+          tag: tag,
           institution_name: institutionName, // Store institution name
           status: "active",
         },
@@ -74,7 +81,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      access_token: accessToken,
+      //access_token: accessToken,
+      access_token: "set",
       item_id: itemId,
       institution_name: institutionName,
       user_email: userEmail,

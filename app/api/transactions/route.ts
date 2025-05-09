@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { plaidClient } from '../../lib/plaidClient';
 import { PlaidApi } from 'plaid';
+import { decrypt } from '@/lib/encryption';
 
-// Define types for TypeScript
 interface Account {
   institution_name: string;
-  access_token: string;
+  encrypted_access_token: string;
+  iv: string;
+  tag: string;
 }
 
 interface ReducedTransaction {
@@ -38,8 +40,16 @@ async function getAllTransactions(
 ): Promise<{ categorySummaries: CategorySummary[], rawTransactions: ReducedTransaction[], allNormalizedReducedTransactions: { primaryCategory: string, monthlyAmount: number }[] }> {
   // Map each account to a promise
   const allTransactionPromises = accounts.map(async (account) => {
+
+    const decryptedAccessToken = decrypt({
+      encryptedToken: account.encrypted_access_token,
+      iv: account.iv,
+      tag: account.tag,
+    });
+
     const transactionsResponse = await plaidClient.transactionsGet({
-      access_token: account.access_token,
+      //access_token: account.access_token,
+      access_token: decryptedAccessToken,
       start_date: start_date,
       end_date: end_date
     });
@@ -123,7 +133,7 @@ export async function POST(req: NextRequest) {
     // Get all access_tokens from the account table for the user email
     const { data: accounts, error: dbError } = await supabase
       .from('accounts')
-      .select('access_token, institution_name')
+      .select('encrypted_access_token, institution_name, iv, tag')
       .eq('email', userEmail);
 
     if (dbError) {
