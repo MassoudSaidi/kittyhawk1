@@ -151,7 +151,8 @@ export async function POST(req: NextRequest) {
         success: "success",
         userId: userId,
         userEmail: userEmail,
-        accounts: accounts,
+        //accounts: accounts,
+        accounts: [],
         transactions: reducedTransactions,        
       },
       { status: 200 }

@@ -1,6 +1,6 @@
 // app/api/info/route.ts
 import { NextResponse } from "next/server";
-import { PLAID_PRODUCTS, ACCESS_TOKEN, ITEM_ID } from "../../lib/plaidClient";
+import { PLAID_PRODUCTS } from "../../lib/plaidClient";
 
 type ResponseData = {
   item_id: string | null;
@@ -10,8 +10,6 @@ type ResponseData = {
 
 export async function POST(request: Request) {
   return NextResponse.json({
-    item_id: ITEM_ID,
-    access_token: ACCESS_TOKEN,
     products: PLAID_PRODUCTS,
   });
 }

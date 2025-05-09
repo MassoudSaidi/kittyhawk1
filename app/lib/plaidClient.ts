@@ -27,14 +27,3 @@ const configuration = new Configuration({
 });
 
 export const plaidClient = new PlaidApi(configuration);
-
-export let ACCESS_TOKEN: string | null = 'access-sandbox-c394079a-c425-4577-baa7-a94ab3995c22';
-export let ITEM_ID: string | null = 'nK3g33AmpPtJwxqJPEVeulV5Kgj199F6gaMWd';
-
-export function setAccessToken(token: string | null) {
-  ACCESS_TOKEN = token;
-}
-
-export function setItemId(id: string | null) {
-  ITEM_ID = id;
-}

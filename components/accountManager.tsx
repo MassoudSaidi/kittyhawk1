@@ -17,8 +17,7 @@ import Context from "../app/Context"; // Adjust path if needed
 interface Account {
     id: number;
     institution_name: string;
-    item_id: string;
-    access_token: string;
+    item_id: string;    
     status: string;
 }
 
@@ -77,7 +76,7 @@ export default function AccountManager() {
     try {
       const { data, error } = await supabase
         .from("accounts")
-        .select("id, institution_name, item_id, access_token, status")
+        .select("id, institution_name, item_id, status")
         .eq("user_id", userId);
 
       if (error) {
@@ -137,7 +136,7 @@ export default function AccountManager() {
   return (
     <>
       <div className="pt-8 pb-4 text-2xl font-bold text-center text-gray-900 dark:text-white">
-        List of connected accounts
+        List of connected accounts.
       </div>
       <Table>
         <TableCaption>List of connected accounts.</TableCaption>
