@@ -64,7 +64,7 @@ export async function POST(request: Request) {
           user_id: user.id, // Store authenticated user ID
           item_id: itemId,
           //access_token: accessToken,
-          access_token: encryptedToken,
+          encrypted_access_token: encryptedToken,
           iv: iv,
           tag: tag,
           institution_name: institutionName, // Store institution name
