@@ -25,41 +25,64 @@ export async function GET() {
       .eq('email', user.email)
       .maybeSingle();
 
-    if (roleError || !roleEntry || roleEntry.role !== 'admin') {
-      return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
-    }
-
-    const { data, error } = await supabase
-      .from('accounts')
-      //.select('email, institution_name, access_token, id', { count: 'exact', head: false });
-      .select('email, id', { count: 'exact', head: false });
-
-      const uniqueEmails = data ? Array.from(
-        new Map(data.map(item => [item.email, item])).values()
-      ) : [];
-      
-    if (error) {
-      //console.error("Error fetching distinct emails:", error.message);
+    if (roleError) {
       return NextResponse.json(
-        { error: "Failed to fetch distinct emails" },
+        { error: "Failed to fetch user role" },
         { status: 500 }
       );
-    }    
+    }      
+
+    // if (roleError || !roleEntry || roleEntry.role !== 'admin') {
+    //   return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
+    // }
     
-    // // --- Call the RPC function ---
-    // const { data, error } = await supabase.rpc('get_distinct_account_emails'); // Call the function by its name
+    // If no role, return only the user's email
+    if (!roleEntry) {
+      return NextResponse.json({ emails: [{ email: user.email, id: user.id }] });
+    }    
 
-    // if (error) {
-    //   console.error("Error calling get_distinct_account_emails RPC:", error.message);
-    //   return NextResponse.json(
-    //     // Provide a slightly more specific error if possible
-    //     { error: `Failed to fetch distinct emails: ${error.message}` },
-    //     { status: 500 }
-    //   );
-    // }    
+    // Handle based on role
+    if (roleEntry.role === 'admin') {
+      // For admins, fetch all unique emails
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('email, id, profiles(full_name)', { count: 'exact', head: false });
 
-    //return NextResponse.json({ emails: data });
-    return NextResponse.json({ emails: uniqueEmails});
+      if (error) {
+        return NextResponse.json(
+          { error: "Failed to fetch accounts" },
+          { status: 500 }
+        );
+      }
+
+      const uniqueEmails = Array.from(
+        new Map(data.map(item => [item.email, item])).values()
+      );
+
+      return NextResponse.json({ emails: uniqueEmails });
+    } else if (roleEntry.role === 'advisor' || roleEntry.role === 'accountant') {
+      // For advisors/accountants, fetch users with this advisor or accountant email in their advisor/accountant field
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('email, id, profiles(full_name)')
+        .or(`advisor.eq.${user.email},accountant.eq.${user.email},email.eq.${user.email}`);
+
+      if (error) {
+        return NextResponse.json(
+          { error: "Failed to fetch advised users" },
+          { status: 500 }
+        );
+      }
+
+      const uniqueEmails = Array.from(
+        new Map(data.map(item => [item.email, item])).values()
+      );
+      console.log(uniqueEmails);
+      return NextResponse.json({ emails: uniqueEmails });
+    } else {
+      // For any other role, return only the user's email
+      return NextResponse.json({ emails: [{ email: user.email, id: user.id, profiles: { full_name: 'Mass 222' } }] });
+    }
   } catch (error) {
     console.error("Unexpected error:", error);
     return NextResponse.json(

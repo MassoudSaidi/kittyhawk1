@@ -89,35 +89,50 @@ const Link = memo(() => {
       }
 
       dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
-      router.push("/"); // Navigate after all processing
+      //router.push("/"); // Navigate after all processing
     },
     [dispatch, isPaymentInitiation, isCraProductsExclusively, router] // Added router to dependencies
   );
+
+  // const onExit = React.useCallback(() => {
+  //   console.log(
+  //     `Plaid Link exited. Error: 
+  //     )}`
+  //   );
+  // }, []);
+
 
   let isOauth = false;
   const config: Parameters<typeof usePlaidLink>[0] = {
     token: linkToken!,
     onSuccess,
+    //onExit,   
   };
-
+  
   // This check needs to happen reliably. Ensure window is defined.
   if (typeof window !== "undefined" && window.location.href.includes("?oauth_state_id=")) {
-    // @ts-ignore // Plaid's types might not include receivedRedirectUri directly in base config
-    config.receivedRedirectUri = window.location.href;
+    
+    config.receivedRedirectUri = window.location.href; 
     isOauth = true;
   }
 
   const { open, ready } = usePlaidLink(config);
 
+  // useEffect(() => {
+  //   // This effect now ONLY handles auto-opening Link on OAuth return
+  //   if (isOauth && ready) {
+  //     console.log("OAuth redirect detected, opening Plaid Link to handle...");
+  //     open();
+  //   }
+  // }, [ready, open, isOauth]);
+
   useEffect(() => {
-    // This effect now ONLY handles auto-opening Link on OAuth return
-    if (isOauth && ready) {
+    if (typeof window !== "undefined" && window.location.href.includes("?oauth_state_id=")) {
       console.log("OAuth redirect detected, opening Plaid Link to handle...");
+      config.receivedRedirectUri = window.location.href;
       open();
     }
-  }, [ready, open, isOauth]);
-
-
+  }, [ready, open]);
 
   return (
     <Button type="button" variant="default" onClick={() => open()} disabled={!ready || !linkToken}>

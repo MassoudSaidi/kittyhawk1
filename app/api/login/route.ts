@@ -36,15 +36,15 @@ export async function POST(request: Request) {
       .eq('email', email)
       .maybeSingle();
 
-    if (roleError || !roleEntry || roleEntry.role !== 'admin') {
-      // Immediately sign the user out to invalidate the session
-      await supabase.auth.signOut();
+    // if (roleError || !roleEntry || roleEntry.role !== 'admin') {
+    //   // Immediately sign the user out to invalidate the session
+    //   await supabase.auth.signOut();
 
-      return NextResponse.json(
-        { error: "Access denied: Admins only" },
-        { status: 403 }
-      );
-    }
+    //   return NextResponse.json(
+    //     { error: "Access denied: Admins only" },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Step 3: Allow access
     return NextResponse.json({

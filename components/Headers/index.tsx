@@ -93,7 +93,7 @@ const Header = memo(() => {
               <div>
                 {itemId && (
                   <p>
-                    <span>Bank item</span>
+                    <span></span>
                   </p>
                 )}
                 {userToken && (
@@ -105,7 +105,7 @@ const Header = memo(() => {
               </div>
               {(isItemAccess || userToken) && (
               <div className="pt-14">
-                {/* <Link /> */}
+                <Link />
               </div>
               )}
             </>

@@ -27,7 +27,7 @@ const configuration = new Configuration({
 const client = new PlaidApi(configuration);
 
 // Server Action to create a Link token
-export async function createLinkToken() {
+export async function createLinkToken2() {
   try {
     interface LinkTokenCreateConfig {
       user: { client_user_id: string };

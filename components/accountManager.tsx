@@ -17,6 +17,7 @@ import Context from "../app/Context"; // Adjust path if needed
 interface Account {
     id: number;
     institution_name: string;
+    account_details: string;
     item_id: string;    
     status: string;
 }
@@ -76,7 +77,7 @@ export default function AccountManager() {
     try {
       const { data, error } = await supabase
         .from("accounts")
-        .select("id, institution_name, item_id, status")
+        .select("id, institution_name, account_details, item_id, status")
         .eq("user_id", userId);
 
       if (error) {
@@ -142,8 +143,8 @@ export default function AccountManager() {
         <TableCaption>List of connected accounts.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>Institution</TableHead>
-
+            <TableHead className="text-left">Institution</TableHead>
+            <TableHead className="text-left">Account Details</TableHead>
             <TableHead className="text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -167,7 +168,7 @@ export default function AccountManager() {
             accounts.map((account) => (
               <TableRow key={account.id}>
                 <TableCell>{account.institution_name}</TableCell>
-
+                <TableCell style={{ whiteSpace: 'pre-line' }}>{account.account_details}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="secondary" onClick={() => handleDisconnect(account.id)}>
                     Disconnect

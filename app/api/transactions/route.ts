@@ -40,29 +40,38 @@ async function getAllTransactions(
 ): Promise<{ categorySummaries: CategorySummary[], rawTransactions: ReducedTransaction[], allNormalizedReducedTransactions: { primaryCategory: string, monthlyAmount: number }[] }> {
   // Map each account to a promise
   const allTransactionPromises = accounts.map(async (account) => {
-
+    
     const decryptedAccessToken = decrypt({
       encryptedToken: account.encrypted_access_token,
       iv: account.iv,
       tag: account.tag,
     });
 
+    
     const transactionsResponse = await plaidClient.transactionsGet({
-      //access_token: account.access_token,
       access_token: decryptedAccessToken,
       start_date: start_date,
       end_date: end_date
     });
-
+    
+    const accountsById = Object.fromEntries(
+      transactionsResponse.data.accounts.map(account => [account.account_id, account])
+    );
+    
     // Reduce transactions for this account
-    return transactionsResponse.data.transactions.map(transaction => ({
-      bank: account.institution_name,
-      date: transaction.date,
-      name: transaction.name,
-      amount: transaction.amount,
-      primaryCategory: transaction.personal_finance_category?.primary ?? 'UNCATEGORIZED',
-      detailedCategory: transaction.personal_finance_category?.detailed ?? 'UNCATEGORIZED'
-    }));
+    return transactionsResponse.data.transactions.map(transaction => {
+      const account = accountsById[transaction.account_id];
+
+      return {
+        bank: transactionsResponse.data.item.institution_name + `   ${account.name} — ${account.subtype} ••••${account.mask}`,
+        date: transaction.date,
+        name: transaction.name,
+        amount: transaction.amount,
+        primaryCategory: transaction.personal_finance_category?.primary ?? 'UNCATEGORIZED',
+        detailedCategory: transaction.personal_finance_category?.detailed ?? 'UNCATEGORIZED',
+        //accountDetails: `${account.name} — ${account.subtype} ••••${account.mask}`
+      };
+    });
   });
 
   // Wait for all promises to resolve and flatten the arrays into one
@@ -122,9 +131,9 @@ export async function POST(req: NextRequest) {
       .eq('email', user.email)
       .maybeSingle();
 
-    if (roleError || !roleEntry || roleEntry.role !== 'admin') {
-      return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
-    }    
+    // if (roleError || !roleEntry || roleEntry.role !== 'admin') {
+    //   return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
+    // }    
 
     // Get data from request body
     const body: RequestBody = await req.json();
@@ -142,9 +151,10 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-
+    
     // Fetch and aggregate transactions for all accounts
-    const reducedTransactions = await getAllTransactions(start_date, end_date, accounts, plaidClient);
+    const reducedTransactions = await getAllTransactions(start_date, end_date, accounts, plaidClient);    
+
 
     return NextResponse.json(
       { 

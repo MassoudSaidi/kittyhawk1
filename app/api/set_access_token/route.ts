@@ -46,11 +46,21 @@ export async function POST(request: Request) {
     //console.log("Token Exchange Data:", JSON.stringify(tokenResponse.data, null, 2));
 
     // // Fetch institution details
-    const itemResponse = await plaidClient.itemGet({
+    // const itemResponse = await plaidClient.itemGet({
+    //   access_token: accessToken,            
+    // });
+
+    const accountsResponse = await plaidClient.accountsGet({
       access_token: accessToken,            
     });
 
-    const institutionName = itemResponse.data.item?.institution_name || "Unknown Institution";
+    const formattedAccounts = accountsResponse.data.accounts.map(account =>
+      `${account.name} — ${account.subtype} ••••${account.mask}`
+    ).join('\n');    
+
+    
+    //const institutionName = itemResponse.data.item?.institution_name || "Unknown Institution";
+    const institutionName = accountsResponse.data.item?.institution_name || "Unknown Institution";
 
     // ecrypted access token
     const { encryptedToken, iv, tag } = encrypt(accessToken);
@@ -68,6 +78,7 @@ export async function POST(request: Request) {
           iv: iv,
           tag: tag,
           institution_name: institutionName, // Store institution name
+          account_details: formattedAccounts,
           status: "active",
         },
       ]);

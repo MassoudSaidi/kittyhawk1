@@ -6,8 +6,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const signUpAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  const email = formData.get("email")?.toString().trim();;
+  const password = formData.get("password")?.toString().trim();;
+
+  const firstName = formData.get("firstName")?.toString().trim();;
+  const middleName = formData.get("middleName")?.toString().trim();;
+  const lastName = formData.get("lastName")?.toString().trim();;
+
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -18,6 +23,15 @@ export const signUpAction = async (formData: FormData) => {
       "Email and password are required",
     );
   }
+
+  // NEW VALIDATION LOGIC: Check if all name fields are empty
+  if (!firstName && !middleName && !lastName) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "Please provide at least a first, middle, or last name.",
+    );
+  }  
 
   const { error } = await supabase.auth.signUp({
     email,
