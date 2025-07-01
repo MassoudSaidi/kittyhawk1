@@ -94,7 +94,11 @@ const Link = memo(() => {
         console.log("Cleaning up the URL");
         const cleanUrl = window.location.href.split("?")[0];
         //router.replace(cleanUrl, { scroll: false });
-        router.replace(window.location.pathname, undefined, { shallow: true });
+        // For Next.js App Router (version 13+)
+        router.replace(window.location.pathname);
+        
+        // Optional: Also use history.replaceState for immediate update
+        window.history.replaceState({}, document.title, window.location.pathname);        
       }      
     },
     [dispatch, isPaymentInitiation, isCraProductsExclusively, router] // Added router to dependencies
