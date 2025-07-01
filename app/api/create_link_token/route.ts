@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const configs: LinkTokenCreateRequest = {
       user: { client_user_id: userId }, // Required: Unique per user
-      client_name: "Integrated Advisors V2", // Required
+      client_name: "Integrated Advisors V3", // Required
       products: PLAID_PRODUCTS, // Required: Already typed as Products[] in plaidClient.ts
       country_codes: (process.env.PLAID_COUNTRY_CODES?.split(",").map((c) => c.trim() as CountryCode)) || [CountryCode.Us], // Required
       language: "en", // Required
