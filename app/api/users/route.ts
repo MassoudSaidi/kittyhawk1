@@ -46,7 +46,7 @@ export async function GET() {
       // For admins, fetch all unique emails
       const { data, error } = await supabase
         .from('accounts')
-        .select('email, id, profiles(full_name)', { count: 'exact', head: false });
+        .select('email, id, profiles(first_name, middle_name, last_name)', { count: 'exact', head: false });
 
       if (error) {
         return NextResponse.json(
@@ -55,8 +55,17 @@ export async function GET() {
         );
       }
 
+      const transformed = data?.map(account => ({
+        ...account,
+        full_name: [
+          account.profiles?.[0]?.first_name,
+          account.profiles?.[0]?.middle_name,
+          account.profiles?.[0]?.last_name
+        ].filter(Boolean).join(' ')
+      }))        
+
       const uniqueEmails = Array.from(
-        new Map(data.map(item => [item.email, item])).values()
+        new Map(transformed.map(item => [item.email, item])).values()
       );
 
       return NextResponse.json({ emails: uniqueEmails });
@@ -64,7 +73,7 @@ export async function GET() {
       // For advisors/accountants, fetch users with this advisor or accountant email in their advisor/accountant field
       const { data, error } = await supabase
         .from('accounts')
-        .select('email, id, profiles(full_name)')
+        .select('email, id, profiles(first_name, middle_name, last_name)')
         .or(`advisor.eq.${user.email},accountant.eq.${user.email},email.eq.${user.email}`);
 
       if (error) {
@@ -74,14 +83,23 @@ export async function GET() {
         );
       }
 
+      const transformed = data?.map(account => ({
+        ...account,
+        full_name: [
+          account.profiles?.[0]?.first_name,
+          account.profiles?.[0]?.middle_name,
+          account.profiles?.[0]?.last_name
+        ].filter(Boolean).join(' ')
+      }))      
+
       const uniqueEmails = Array.from(
-        new Map(data.map(item => [item.email, item])).values()
+        new Map(transformed.map(item => [item.email, item])).values()
       );
-      console.log(uniqueEmails);
+      // console.log(uniqueEmails);
       return NextResponse.json({ emails: uniqueEmails });
     } else {
       // For any other role, return only the user's email
-      return NextResponse.json({ emails: [{ email: user.email, id: user.id, profiles: { full_name: 'Mass 222' } }] });
+      return NextResponse.json({ emails: [{ email: user.email, id: user.id, profiles: { full_name: 'You' } }] });
     }
   } catch (error) {
     console.error("Unexpected error:", error);

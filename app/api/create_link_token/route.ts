@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       products: PLAID_PRODUCTS, // Required: Already typed as Products[] in plaidClient.ts
       country_codes: (process.env.PLAID_COUNTRY_CODES?.split(",").map((c) => c.trim() as CountryCode)) || [CountryCode.Us], // Required
       language: "en", // Required
-      redirect_uri: "http://localhost:8000/protected/client-area", // Optional
+      redirect_uri: process.env.PLAID_REDIRECT_URI, // Optional
       android_package_name: process.env.PLAID_ANDROID_PACKAGE_NAME || undefined, // Optional
       link_customization_name: "default",
     };

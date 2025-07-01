@@ -41,6 +41,7 @@ async function getAllTransactions(
   // Map each account to a promise
   const allTransactionPromises = accounts.map(async (account) => {
     
+    
     const decryptedAccessToken = decrypt({
       encryptedToken: account.encrypted_access_token,
       iv: account.iv,
@@ -53,6 +54,7 @@ async function getAllTransactions(
       start_date: start_date,
       end_date: end_date
     });
+    
     
     const accountsById = Object.fromEntries(
       transactionsResponse.data.accounts.map(account => [account.account_id, account])
@@ -74,6 +76,7 @@ async function getAllTransactions(
     });
   });
 
+  
   // Wait for all promises to resolve and flatten the arrays into one
   const allReducedTransactions = (await Promise.all(allTransactionPromises)).flat();
   //return allReducedTransactions;
@@ -116,6 +119,7 @@ async function getAllTransactions(
 // Define the API route
 export async function POST(req: NextRequest) {
   try {
+    
     const supabase = await createClient();
     
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -134,7 +138,7 @@ export async function POST(req: NextRequest) {
     // if (roleError || !roleEntry || roleEntry.role !== 'admin') {
     //   return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
     // }    
-
+    
     // Get data from request body
     const body: RequestBody = await req.json();
     const { userId, userEmail,start_date, end_date } = body;
@@ -152,9 +156,9 @@ export async function POST(req: NextRequest) {
       );
     }
     
+    
     // Fetch and aggregate transactions for all accounts
     const reducedTransactions = await getAllTransactions(start_date, end_date, accounts, plaidClient);    
-
 
     return NextResponse.json(
       { 

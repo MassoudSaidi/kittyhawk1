@@ -2,6 +2,7 @@
 
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
+import supabaseAdmin from '@/utils/supabase/admin'
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -33,7 +34,7 @@ export const signUpAction = async (formData: FormData) => {
     );
   }  
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -45,6 +46,24 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
+
+    // Insert into profiles table if user is returned. use service role    
+    const user = data.user;
+    if (user) {
+      const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
+        id: user.id, // assuming `id` in profiles is the user's UUID
+        first_name: firstName || null,
+        middle_name: middleName || null,
+        last_name: lastName || null,
+      });
+
+      if (profileError) {
+        console.error("Profile insert error:", profileError.message);
+        return encodedRedirect("error", "/sign-up", "Signup succeeded, but we couldn't save your name.");
+      }
+    }
+  
+  
     return encodedRedirect(
       "success",
       "/sign-up",

@@ -116,6 +116,7 @@ const Link = memo(() => {
     isOauth = true;
   }
 
+  console.log("window.location.href2: " + window.location.href);
   const { open, ready } = usePlaidLink(config);
 
   // useEffect(() => {
@@ -127,6 +128,7 @@ const Link = memo(() => {
   // }, [ready, open, isOauth]);
 
   useEffect(() => {
+    console.log("window.location.href: " + window.location.href);
     if (typeof window !== "undefined" && window.location.href.includes("?oauth_state_id=")) {
       console.log("OAuth redirect detected, opening Plaid Link to handle...");
       config.receivedRedirectUri = window.location.href;
