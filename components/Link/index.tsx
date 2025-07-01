@@ -89,7 +89,13 @@ const Link = memo(() => {
       }
 
       dispatch({ type: "SET_STATE", state: { linkSuccess: true } });
-      //router.push("/"); // Navigate after all processing
+      // Clean up the URL by removing the OAuth query parameters
+      if (typeof window !== "undefined" && window.location.href.includes("?oauth_state_id=")) {
+        console.log("Cleaning up the URL");
+        const cleanUrl = window.location.href.split("?")[0];
+        //router.replace(cleanUrl, { scroll: false });
+        router.replace(window.location.pathname, undefined, { shallow: true });
+      }      
     },
     [dispatch, isPaymentInitiation, isCraProductsExclusively, router] // Added router to dependencies
   );
