@@ -28,11 +28,11 @@ export async function POST(request: Request) {
 
     const configs: LinkTokenCreateRequest = {
       user: { client_user_id: userId }, // Required: Unique per user
-      client_name: "Integrated Quickstart V1", // Required
+      client_name: "Integrated Advisors V2", // Required
       products: PLAID_PRODUCTS, // Required: Already typed as Products[] in plaidClient.ts
       country_codes: (process.env.PLAID_COUNTRY_CODES?.split(",").map((c) => c.trim() as CountryCode)) || [CountryCode.Us], // Required
       language: "en", // Required
-      redirect_uri: process.env.PLAID_REDIRECT_URI, // Optional
+      redirect_uri: process.env.PLAID_REDIRECT_URI || undefined, // Optional
       android_package_name: process.env.PLAID_ANDROID_PACKAGE_NAME || undefined, // Optional
       link_customization_name: "default",
     };
