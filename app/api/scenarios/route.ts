@@ -116,19 +116,15 @@ export async function POST(request: Request) {
     
     const allowedRoles = ['admin', 'accountant', 'advisor'];
 
-    if (roleError || !roleEntry || !allowedRoles.includes(roleEntry?.role)) {
-      // Immediately sign the user out to invalidate the session
-      //await supabase.auth.signOut();
-
-      return NextResponse.json(
-        { error: "Access denied: Insufficient permissions" },
-        { status: 403 }
-      );
-    }
+    // if (roleError || !roleEntry || !allowedRoles.includes(roleEntry?.role)) {
+    //   return NextResponse.json(
+    //     { error: "Access denied: Insufficient permissions" },
+    //     { status: 403 }
+    //   );
+    // }
 
     // Step 3: Check if userEmail matches authenticated user's email
     if (!allowedRoles.includes(roleEntry?.role) && userEmail.toLowerCase() !== user.email?.toLowerCase()) {
-      //await supabase.auth.signOut();
       return NextResponse.json(
         { error: "Access denied: Email mismatch" },
         { status: 403 }
@@ -146,8 +142,8 @@ export async function POST(request: Request) {
 
     if (scenarioError) {
       return NextResponse.json(
-        { error: "Failed to fetch scenario data" },
-        { status: 500 }
+        { error: "Scenario not found" },
+        { status: 404 }
       );
     }
 
