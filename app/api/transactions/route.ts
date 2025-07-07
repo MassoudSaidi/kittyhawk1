@@ -81,18 +81,34 @@ async function getAllTransactions(
   const allReducedTransactions = (await Promise.all(allTransactionPromises)).flat();
   //return allReducedTransactions;
 
-  // Aggregate amounts by primaryCategory
+  // // Aggregate amounts by detailedCategory
+  // const categoryMap: { [key: string]: number } = {};
+
+  // allReducedTransactions.forEach(transaction => {
+  //   const category = transaction.detailedCategory;
+  //   const amount = transaction.amount;
+
+  //   if (!categoryMap[category]) {
+  //     categoryMap[category] = 0;
+  //   }
+  //   categoryMap[category] += amount;
+  // });
+
   const categoryMap: { [key: string]: number } = {};
 
   allReducedTransactions.forEach(transaction => {
     const category = transaction.detailedCategory;
-    const amount = transaction.amount;
-
-    if (!categoryMap[category]) {
+    // Convert amount to number and ensure it's finite
+    const amount = Number(transaction.amount) || 0;
+    
+    if (!categoryMap.hasOwnProperty(category)) {
       categoryMap[category] = 0;
     }
     categoryMap[category] += amount;
   });
+
+  // For better precision, you could multiply by 100 and work with cents
+  // Then divide by 100 when displaying  
 
   // Normalize to monthly values (30-day)
   const delta = Math.ceil((new Date(end_date).getTime() - new Date(start_date).getTime()) / (1000 * 60 * 60 * 24));
