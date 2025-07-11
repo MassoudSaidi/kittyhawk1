@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<OfficeApp
+	xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+	xsi:type="TaskPaneApp"
+>
+	<Id>bb2f5c9d-14a8-4ab7-a4a1-cf57b1053a14</Id>
+
+	<Version>1.0.0.0</Version>
+
+	<ProviderName>Integrated Advisors</ProviderName>
+
+	<DefaultLocale>en-US</DefaultLocale>
+
+	<DisplayName DefaultValue="IFx Controls" />
+
+	<Description DefaultValue="Controls and inputs for the IFx" />
+
+	<IconUrl DefaultValue="https://https://kittyhawk1.vercel.app/;/assets/icon-32.png" />
+
+	<HighResolutionIconUrl
+		DefaultValue="https://https://kittyhawk1.vercel.app/;/assets/icon-80.png"
+	/>
+
+	<SupportUrl DefaultValue="https://iadvs.com" />
+
+	<Hosts>
+		<Host Name="Workbook" />
+	</Hosts>
+
+	<DefaultSettings>
+		<SourceLocation DefaultValue="https://https://kittyhawk1.vercel.app/;/" />
+	</DefaultSettings>
+
+	<Permissions>ReadWriteDocument</Permissions>
+
+	<VersionOverrides
+		xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+		xsi:type="VersionOverridesV1_0"
+	>
+		<Hosts>
+			<Host xsi:type="Workbook">
+				<DesktopFormFactor>
+					<ExtensionPoint xsi:type="PrimaryCommandSurface">
+						<OfficeTab id="TabHome">
+							<Group id="IFxCommands">
+								<Label resid="IFxCommands.Label" />
+
+								<Icon>
+									<bt:Image
+										size="16"
+										resid="Icon.16x16"
+									/>
+
+									<bt:Image
+										size="32"
+										resid="Icon.32x32"
+									/>
+
+									<bt:Image
+										size="64"
+										resid="Icon.64x64"
+									/>
+
+									<bt:Image
+										size="80"
+										resid="Icon.80x80"
+									/>
+								</Icon>
+
+								<Control
+									xsi:type="Button"
+									id="TaskpaneButton"
+								>
+									<Label resid="TaskpaneButton.Label" />
+
+									<Supertip>
+										<Title resid="TaskpaneButton.Label" />
+										<Description resid="TaskpaneButton.Tooltip" />
+									</Supertip>
+
+									<Icon>
+										<bt:Image
+											size="16"
+											resid="Icon.16x16"
+										/>
+
+										<bt:Image
+											size="32"
+											resid="Icon.32x32"
+										/>
+
+										<bt:Image
+											size="64"
+											resid="Icon.64x64"
+										/>
+
+										<bt:Image
+											size="80"
+											resid="Icon.80x80"
+										/>
+									</Icon>
+
+									<Action xsi:type="ShowTaskpane">
+										<TaskpaneId>Office.AutoShowTaskpaneWithDocument</TaskpaneId>
+										<SourceLocation resid="Taskpane.Url" />
+										<Title resid="Taskpane.Title" />
+									</Action>
+								</Control>
+							</Group>
+						</OfficeTab>
+					</ExtensionPoint>
+				</DesktopFormFactor>
+			</Host>
+		</Hosts>
+		<Resources>
+			<bt:Images>
+				<bt:Image
+					id="Icon.16x16"
+					DefaultValue="https://https://kittyhawk1.vercel.app/;/assets/icon-16.png"
+				/>
+
+				<bt:Image
+					id="Icon.32x32"
+					DefaultValue="https://https://kittyhawk1.vercel.app/;/assets/icon-32.png"
+				/>
+
+				<bt:Image
+					id="Icon.64x64"
+					DefaultValue="https://https://kittyhawk1.vercel.app/;/assets/icon-64.png"
+				/>
+
+				<bt:Image
+					id="Icon.80x80"
+					DefaultValue="https://https://kittyhawk1.vercel.app/;/assets/icon-80.png"
+				/>
+			</bt:Images>
+
+			<bt:Urls>
+				<bt:Url
+					id="Taskpane.Url"
+					DefaultValue="https://https://kittyhawk1.vercel.app/;/"
+				/>
+			</bt:Urls>
+
+			<bt:ShortStrings>
+				<bt:String
+					id="Taskpane.Title"
+					DefaultValue="IFx Controls"
+				/>
+
+				<bt:String
+					id="IFxCommands.Label"
+					DefaultValue="IFx"
+				/>
+
+				<bt:String
+					id="TaskpaneButton.Label"
+					DefaultValue="Show IFx Controls"
+				/>
+			</bt:ShortStrings>
+
+			<bt:LongStrings>
+				<bt:String
+					id="TaskpaneButton.Tooltip"
+					DefaultValue="Click to Toggle the IFx Control Panel"
+				/>
+			</bt:LongStrings>
+		</Resources>
+	</VersionOverrides>
+</OfficeApp>

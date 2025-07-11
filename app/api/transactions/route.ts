@@ -144,6 +144,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
     }    
 
+    console.log("1111111111111111");
     // Check user's role in the user_roles table
     const { data: roleEntry, error: roleError } = await supabase
       .from('user_roles')
@@ -154,6 +155,7 @@ export async function POST(req: NextRequest) {
     // if (roleError || !roleEntry || roleEntry.role !== 'admin') {
     //   return NextResponse.json({ message: 'Forbidden: Admins only' }, { status: 403 });
     // }    
+    
     
     // Get data from request body
     const body: RequestBody = await req.json();
